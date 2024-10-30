@@ -1,0 +1,6 @@
+tk
+customtkinter
+pillow
+playsound
+pyserial
+pygobject
