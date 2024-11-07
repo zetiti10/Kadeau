@@ -6,6 +6,7 @@ import serial.tools.list_ports
 from playsound import playsound
 import time
 from threading import Thread
+import os
 
 # Classe du logiciel.
 
@@ -31,6 +32,7 @@ class KadeauApp:
         self.ports_dictionary.clear()
         for port, desc, hwid in sorted(available_ports):
             self.ports_dictionary[port] = desc
+        self.ports_dictionary["none"] = "Choisir un port"
 
     # Rafraîchis la liste des ports affichée dans un sélecteur d'élément.
     def refresh_ports_chooser(self):
@@ -41,7 +43,7 @@ class KadeauApp:
     # Initialise la connexion à partir du port choisi.
     def begin_connection(self):
         selected_port = self.port_chooser.get()
-        if not selected_port:
+        if not selected_port or selected_port == "Choisir un port":
             return
 
         for port_id, port_name in self.ports_dictionary.items():
@@ -126,7 +128,10 @@ class KadeauApp:
             music_thread.start()
 
     def play_missile_launch_sound(self):
-        playsound('assets/launch.mp3')
+        if os.name == "nt":
+            playsound('assets\launch.mp3')
+        else:
+            playsound('assets/launch.mp3')
 
     # Reçoit les mises à jour de l'état du missile.
     def serial_loop(self):
@@ -159,7 +164,7 @@ class KadeauApp:
         self.window.title("Kadeau")
         self.window.minsize(400, 675)
         window_icon = PhotoImage(file="assets/icon.png")
-        self.window.wm_iconphoto(False, window_icon)
+        self.window.after(201, lambda :self.window.wm_iconphoto(False, window_icon))
         self.window.grid_columnconfigure(0, weight=1)
 
         # Association des touches du clavier au mouvements du lance-missile
@@ -202,7 +207,7 @@ class KadeauApp:
         connect_button.grid(row=2, column=1, padx=10,
                             pady=(0, 10), sticky="ew")
         self.calibrate_button = customtkinter.CTkButton(
-            port_frame, text="Calibrer", command=self.begin_connection, state="disabled")
+            port_frame, text="Calibrer", command=self.calibrate, state="disabled")
         self.calibrate_button.grid(row=2, column=2, padx=10,
                               pady=(0, 10), sticky="ew")
 
